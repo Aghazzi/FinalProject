@@ -2,13 +2,21 @@ import express from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import connectDB from "./config.js";
+import UserRouter from "./Routes/userRoute.js";
+import bodyParser from "body-parser";
+import OrganizationRouter from "./Routes/organizationRoute.js";
+import JobRouter from "./Routes/jobRoute.js";
 
 dotenv.config();
 
-await connectDB();
+connectDB();
+
 const PORT = process.env.PORT || 5000;
 const app = express();
 app.use(express.json());
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
@@ -17,6 +25,10 @@ if (process.env.NODE_ENV === "development") {
 app.get("/", (req, res) => {
     res.send("API is running ...");
 });
+
+app.use("/user", UserRouter);
+app.use("/organization", OrganizationRouter);
+app.use("/job", JobRouter);
 
 app.listen(
     PORT,
