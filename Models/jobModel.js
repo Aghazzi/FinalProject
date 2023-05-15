@@ -56,7 +56,8 @@ const JobSchema = new Schema(
 
 JobSchema.plugin(mongoosePaginate);
 JobSchema.pre(["find", "findOne"], function () {
-    this.populate("volunteers").this.populate("orgId");
+    this.populate("volunteers");
+    this.populate("orgId");
 });
 const Job = model("Job", JobSchema);
 export default Job;

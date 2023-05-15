@@ -74,6 +74,7 @@ export const createJob = async (req, res) => {
         schedule,
         nbOfVolunteers,
         volunteers,
+        orgId,
     } = req.body;
 
     try {
@@ -89,6 +90,7 @@ export const createJob = async (req, res) => {
             schedule,
             nbOfVolunteers,
             volunteers,
+            orgId,
         });
 
         return res
