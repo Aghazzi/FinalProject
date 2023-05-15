@@ -5,52 +5,64 @@ import bcrypt from "bcrypt";
 // Register //
 export const register = async (req, res) => {
     const {
-        username,
         email,
         password,
         firstName,
         lastName,
         country,
         city,
-        district,
         skills,
         experience,
         interests,
         role,
+        newsResources,
+        contactPersonEmail,
+        contactPersonPhone,
+        contactPersonName,
+        orgName,
+        description,
+        website,
     } = req.body;
 
     try {
         const existingUser = await User.findOne({
-            $or: [{ username }, { email }],
+            email,
         });
 
         if (existingUser) {
-            return res
-                .status(409)
-                .json({ message: "Username or email already exists" });
+            return res.status(409).json({ message: "email already exists" });
         }
         const newUser = new User({
-            username,
             email,
             password,
             country,
-            district,
             city,
-            skills,
-            experience,
-            interests,
             role,
         });
-        if (role === "User") {
+        if (role === "User" || role === "Admin") {
             newUser.firstName = firstName;
             newUser.lastName = lastName;
+            skills ? (newUser.skills = skills) : null;
+            experience ? (newUser.experience = experience) : null;
+            interests ? (newUser.interests = interests) : null;
+        } else if (role === "Org") {
+            newUser.orgName = orgName;
+            newUser.newsResources = newsResources;
+            newUser.contactPersonEmail = contactPersonEmail;
+            newUser.contactPersonPhone = contactPersonPhone;
+            newUser.contactPersonName = contactPersonName;
+            description ? (newUser.description = description) : null;
+            website ? (newUser.website = website) : null;
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newUser.password, salt);
         newUser.password = hashedPassword;
         await newUser.validate();
-        await newUser.save();
-        return res.status(201).json({ message: "Registration successful" });
+        const user = await newUser.save();
+        const { password: removedPassword, ...returnUser } = user._doc;
+        return res
+            .status(201)
+            .json({ message: "Registration successful", user: returnUser });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: error.message });
@@ -59,15 +71,14 @@ export const register = async (req, res) => {
 
 // log in //
 export const login = async (req, res) => {
-    const { username, password } = req.body;
-
+    const { email, password } = req.body;
     try {
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ email }).select("password");
+        console.log(user);
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: "email not found" });
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
-
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Invalid password" });
         }
@@ -78,7 +89,7 @@ export const login = async (req, res) => {
             httpOnly: true,
             maxAge: 60 * 60 * 1000,
         });
-        return res.status(200).json({ message: "Login successful", user });
+        return res.status(200).json({ message: "Login successful" });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: error.message });
@@ -165,7 +176,7 @@ export const getOrganizationsPagination = async (req, res) => {
             sort: { createdAt: -1 },
         };
 
-        const query = { role: "Organization" };
+        const query = { role: "Org" };
 
         const result = await User.paginate(query, options);
 

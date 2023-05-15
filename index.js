@@ -4,7 +4,7 @@ import morgan from "morgan";
 import connectDB from "./config.js";
 import UserRouter from "./Routes/userRoute.js";
 import bodyParser from "body-parser";
-import OrganizationRouter from "./Routes/organizationRoute.js";
+// import OrganizationRouter from "./Routes/organizationRoute.js";
 import JobRouter from "./Routes/jobRoute.js";
 
 dotenv.config();
@@ -27,7 +27,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/user", UserRouter);
-app.use("/organization", OrganizationRouter);
+// app.use("/organization", OrganizationRouter);
 app.use("/job", JobRouter);
 
 app.listen(

@@ -5,11 +5,6 @@ import mongoosePaginate from "mongoose-paginate-v2";
 
 const UserSchema = new Schema(
     {
-        username: {
-            type: String,
-            required: true,
-            unique: true,
-        },
         email: {
             type: String,
             required: [true, "email is required"],
@@ -23,44 +18,26 @@ const UserSchema = new Schema(
                 validator.isStrongPassword,
                 "please enter a strong password",
             ],
+            select: false,
+        },
+        country: {
+            type: String,
+            required: [true, "country is required"],
+        },
+        city: {
+            type: String,
         },
         firstName: {
             type: String,
             required: function () {
-                return this.role === "User";
+                return this.role === "User" || this.role === "Admin";
             },
         },
         lastName: {
             type: String,
             required: function () {
-                return this.role === "User";
+                return this.role === "User" || this.role === "Admin";
             },
-        },
-        country: {
-            type: String,
-            required: function () {
-                return this.role === "User";
-            },
-        },
-        city: {
-            type: String,
-            required: function () {
-                return this.role === "User";
-            },
-        },
-        district: {
-            type: String,
-            required: function () {
-                return this.role === "User";
-            },
-        },
-        isAdmin: {
-            type: Boolean,
-            default: false,
-        },
-        isActive: {
-            type: Boolean,
-            default: true,
         },
         skills: {
             type: Array,
@@ -99,12 +76,70 @@ const UserSchema = new Schema(
                 return this.role === "User";
             },
         },
+        orgName: {
+            type: String,
+            required: function () {
+                return this.role === "Org";
+            },
+        },
+        contactPersonName: {
+            type: String,
+            required: function () {
+                return this.role === "Org";
+            },
+        },
+        contactPersonPhone: {
+            type: String,
+            required: function () {
+                return this.role === "Org";
+            },
+            validate: [validator.isMobilePhone, "please enter a valid Phone"],
+        },
+        contactPersonEmail: {
+            type: String,
+            required: function () {
+                return this.role === "Org";
+            },
+            validate: [validator.isEmail, "Please enter a valid email"],
+        },
+        newsResources: [
+            {
+                title: {
+                    type: String,
+                    required: true,
+                },
+                description: {
+                    type: String,
+                    required: true,
+                },
+                content: {
+                    type: String,
+                    required: true,
+                },
+            },
+        ],
+        Jobs: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "Job",
+            },
+        ],
+        description: {
+            type: String,
+        },
+        website: {
+            type: String,
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
+        },
         image: {
             type: String,
         },
         role: {
             type: String,
-            enum: ["User", "Admin", "Organization"],
+            enum: ["User", "Admin", "Org"],
             default: "User",
         },
     },
@@ -115,5 +150,8 @@ const UserSchema = new Schema(
 );
 
 UserSchema.plugin(mongoosePaginate);
+UserSchema.pre(["find", "findOne"], function () {
+    this.populate("Jobs");
+});
 const User = model("User", UserSchema);
 export default User;

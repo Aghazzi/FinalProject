@@ -77,6 +77,8 @@ export const createJob = async (req, res) => {
     } = req.body;
 
     try {
+        console.log(requiredSkills);
+        console.log(typeof requiredSkills);
         const job = await Job.create({
             title,
             description,
