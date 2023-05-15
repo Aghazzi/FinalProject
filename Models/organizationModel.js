@@ -71,7 +71,7 @@ const OrganizationSchema = new Schema(
         ],
         Job: {
             type: Schema.Types.ObjectId,
-            ref: "Jobs",
+            ref: "Job",
         },
     },
     {

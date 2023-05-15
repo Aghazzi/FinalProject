@@ -38,10 +38,10 @@ const JobSchema = new Schema(
             type: Number,
             required: true,
         },
-        User: [
+        volunteers: [
             {
                 type: Schema.Types.ObjectId,
-                ref: "Users",
+                ref: "User",
             },
         ],
     },
@@ -53,7 +53,7 @@ const JobSchema = new Schema(
 
 JobSchema.plugin(mongoosePaginate);
 JobSchema.pre(["find", "findOne"], function () {
-    this.populate("User");
+    this.populate("volunteers");
 });
 const Job = model("Job", JobSchema);
 export default Job;
