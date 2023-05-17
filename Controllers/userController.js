@@ -1,4 +1,5 @@
 import User from "../Models/userModel.js";
+import Job from "../Models/jobModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -71,25 +72,39 @@ export const register = async (req, res) => {
 
 // log in //
 export const login = async (req, res) => {
+    console.log("lvl0")
+
     const { email, password } = req.body;
+    console.log("lvl00")
+
     try {
         const user = await User.findOne({ email }).select("password");
-        console.log(user);
         if (!user) {
+            console.log("lvl1")
             return res.status(404).json({ message: "email not found" });
         }
+        console.log("lvl2")
+
         const isPasswordValid = await bcrypt.compare(password, user.password);
+        console.log("lvl3")
+
         if (!isPasswordValid) {
+            console.log("lvl4")
+
             return res.status(401).json({ message: "Invalid password" });
         }
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
             expiresIn: "1h",
         });
+        console.log("lvl5")
+
         res.cookie("token", token, {
             httpOnly: true,
             maxAge: 60 * 60 * 1000,
         });
-        return res.status(200).json({ message: "Login successful" });
+        console.log("lvl6")
+
+        return res.status(200).json({ message: "Logged in successfully" });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: error.message });
@@ -241,6 +256,35 @@ export const getUsersPagination = async (req, res) => {
     }
 };
 
+export const applyForJob = async (req, res) => {
+    const { Jobs } = req.params;
+    const { volunteers } = req.body;
+
+    try {
+        const user = await User.findById(volunteers);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const job = await Job.findById(Jobs);
+
+        if (!job) {
+            return res.status(404).json({ message: "Job not found" });
+        }
+
+        user.Jobs.push(Jobs);
+        user.Jobs.push(volunteers);
+        await user.save();
+        return res
+            .status(200)
+            .json({ message: "Job application successful", user });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
 const UserController = {
     login,
     register,
@@ -250,5 +294,6 @@ const UserController = {
     deleteUser,
     getOrganizationsPagination,
     getUsersPagination,
+    applyForJob,
 };
 export default UserController;

@@ -92,7 +92,12 @@ export const createJob = async (req, res) => {
             volunteers,
             orgId,
         });
-
+        const org = await User.findById(orgId);
+        if (!org) {
+            return res.status(404).json({ message: "Organization not found" });
+        }
+        org.Jobs.push(job._id);
+        await org.save();
         return res
             .status(201)
             .json({ message: "Job created Successfully", job });
