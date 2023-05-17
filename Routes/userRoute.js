@@ -1,11 +1,12 @@
 import UserController from "../Controllers/userController.js";
 import express from "express";
+import verifyToken from "../middleware/authentication.js";
 
 const router = express.Router();
 
 router.post("/login", UserController.login);
 router.post("/register", UserController.register);
-router.post("/apply/:Jobs", UserController.applyForJob);
+router.post("/apply/:jobId", UserController.applyForJob);
 
 router.get("/organizations", UserController.getOrganizationsPagination);
 router.get("/users", UserController.getUsersPagination);

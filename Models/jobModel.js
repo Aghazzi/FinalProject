@@ -47,18 +47,6 @@ const JobSchema = new Schema(
                 ref: "User",
             },
         ],
-        // acceptedVolunteers: [
-        //     {
-        //         type: Schema.Types.ObjectId,
-        //         ref: "User",
-        //     },
-        // ],
-        // rejectedVolunteers: [
-        //     {
-        //         type: Schema.Types.ObjectId,
-        //         ref: "User",
-        //     },
-        // ],
     },
     {
         collection: "Jobs",
@@ -67,11 +55,5 @@ const JobSchema = new Schema(
 );
 
 JobSchema.plugin(mongoosePaginate);
-JobSchema.pre(["find", "findOne"], function () {
-    this.populate("volunteers");
-    this.populate("orgId");
-    // this.populate("acceptedVolunteers");
-    // this.populate("rejectedVolunteers");
-});
 const Job = model("Job", JobSchema);
 export default Job;

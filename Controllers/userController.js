@@ -72,37 +72,37 @@ export const register = async (req, res) => {
 
 // log in //
 export const login = async (req, res) => {
-    console.log("lvl0")
+    console.log("lvl0");
 
     const { email, password } = req.body;
-    console.log("lvl00")
+    console.log("lvl00");
 
     try {
         const user = await User.findOne({ email }).select("password");
         if (!user) {
-            console.log("lvl1")
+            console.log("lvl1");
             return res.status(404).json({ message: "email not found" });
         }
-        console.log("lvl2")
+        console.log("lvl2");
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
-        console.log("lvl3")
+        console.log("lvl3");
 
         if (!isPasswordValid) {
-            console.log("lvl4")
+            console.log("lvl4");
 
             return res.status(401).json({ message: "Invalid password" });
         }
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
             expiresIn: "1h",
         });
-        console.log("lvl5")
+        console.log("lvl5");
 
         res.cookie("token", token, {
             httpOnly: true,
             maxAge: 60 * 60 * 1000,
         });
-        console.log("lvl6")
+        console.log("lvl6");
 
         return res.status(200).json({ message: "Logged in successfully" });
     } catch (error) {
@@ -127,8 +127,10 @@ export const getUserById = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const user = await User.findById(id);
-
+        const user = await User.findById(id).populate({
+            path: "Jobs",
+            select: "-volunteers",
+        });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -192,7 +194,6 @@ export const getOrganizationsPagination = async (req, res) => {
         };
 
         const query = { role: "Org" };
-
         const result = await User.paginate(query, options);
 
         const { docs, totalDocs, totalPages, hasNextPage, nextPage } = result;
@@ -257,24 +258,30 @@ export const getUsersPagination = async (req, res) => {
 };
 
 export const applyForJob = async (req, res) => {
-    const { Jobs } = req.params;
-    const { volunteers } = req.body;
+    const { jobId } = req.params;
+    console.log(jobId);
+    const { applicant } = req.body;
 
     try {
-        const user = await User.findById(volunteers);
+        const user = await User.findById(applicant);
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        const job = await Job.findById(Jobs);
+        const appliedJob = await Job.findById(jobId);
 
-        if (!job) {
+        if (!appliedJob) {
             return res.status(404).json({ message: "Job not found" });
         }
-
-        user.Jobs.push(Jobs);
-        user.Jobs.push(volunteers);
+        if (appliedJob.volunteers.includes(applicant)) {
+            return res
+                .status(400)
+                .json({ message: "User has already applied to this job" });
+        }
+        appliedJob.volunteers.push(applicant);
+        await appliedJob.save();
+        user.Jobs.push(jobId);
         await user.save();
         return res
             .status(200)

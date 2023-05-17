@@ -124,18 +124,6 @@ const UserSchema = new Schema(
                 ref: "Job",
             },
         ],
-        // accceptedJobs: [
-        //     {
-        //         type: Schema.Types.ObjectId,
-        //         ref: "Job",
-        //     },
-        // ],
-        // rejectedJobs: [
-        //     {
-        //         type: Schema.Types.ObjectId,
-        //         ref: "Job",
-        //     },
-        // ],
         description: {
             type: String,
         },
@@ -162,10 +150,5 @@ const UserSchema = new Schema(
 );
 
 UserSchema.plugin(mongoosePaginate);
-UserSchema.pre(["find", "findOne"], function () {
-    this.populate("Jobs");
-    // this.populate("acceptedJobs");
-    // this.populate("rejectedJobs");
-});
 const User = model("User", UserSchema);
 export default User;
