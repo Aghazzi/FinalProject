@@ -72,38 +72,33 @@ export const register = async (req, res) => {
 
 // log in //
 export const login = async (req, res) => {
-    console.log("lvl0");
-
     const { email, password } = req.body;
-    console.log("lvl00");
 
     try {
-        const user = await User.findOne({ email }).select("password");
+        const user = await User.findOne({ email }).select("password role");
+        console.log(user);
         if (!user) {
-            console.log("lvl1");
             return res.status(404).json({ message: "email not found" });
         }
-        console.log("lvl2");
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
-        console.log("lvl3");
 
         if (!isPasswordValid) {
-            console.log("lvl4");
-
             return res.status(401).json({ message: "Invalid password" });
         }
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "1h",
-        });
-        console.log("lvl5");
+        const token = jwt.sign(
+            { userId: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h",
+            }
+        );
 
         res.cookie("token", token, {
             httpOnly: true,
             maxAge: 60 * 60 * 1000,
         });
-        console.log("lvl6");
-
+        // console.log(user)
         return res.status(200).json({ message: "Logged in successfully" });
     } catch (error) {
         console.error(error);
@@ -127,15 +122,36 @@ export const getUserById = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const user = await User.findById(id).populate({
-            path: "Jobs",
-            select: "-volunteers",
-        });
-        if (!user) {
+        const user = await User.findById({ _id: id, role: "User" })
+            .populate({
+                path: "appliedJobs",
+                select: "-volunteers",
+            })
+            .select("-newsResources");
+        if (!user || user.role !== "User") {
             return res.status(404).json({ message: "User not found" });
         }
 
         return res.status(200).json(user);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+export const getOrgById = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const org = await User.findById({ _id: id, role: "Org" })
+            .populate({
+                path: "appliedJobs",
+                select: "-volunteers",
+            })
+            .select("-skills -experience -interests");
+        if (!org || org.role !== "Org") {
+            return res.status(404).json({ message: "Organization not found" });
+        }
+        return res.status(200).json(org);
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: error.message });
@@ -212,7 +228,13 @@ export const getOrganizationsPagination = async (req, res) => {
                 : null,
         };
 
-        return res.status(200).json({ organizations: docs, pagination });
+        const populatedDocs = await User.find({ _id: { $in: docs } }).select(
+            "-skills -experience -interests"
+        );
+
+        return res
+            .status(200)
+            .json({ organizations: populatedDocs, pagination });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: error.message });
@@ -250,7 +272,11 @@ export const getUsersPagination = async (req, res) => {
                 : null,
         };
 
-        return res.status(200).json({ users: docs, pagination });
+        const populatedDocs = await User.find({ _id: { $in: docs } }).select(
+            "-newsResources"
+        );
+
+        return res.status(200).json({ users: populatedDocs, pagination });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: error.message });
@@ -260,10 +286,12 @@ export const getUsersPagination = async (req, res) => {
 export const applyForJob = async (req, res) => {
     const { jobId } = req.params;
     console.log(jobId);
-    const { applicant } = req.body;
+    // const { applicant } = req.body;
+    const applicant = req.user.userId;
 
     try {
-        const user = await User.findById(applicant);
+        const user = await User.findById(req.user.userId);
+        console.log(user);
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -281,7 +309,7 @@ export const applyForJob = async (req, res) => {
         }
         appliedJob.volunteers.push(applicant);
         await appliedJob.save();
-        user.Jobs.push(jobId);
+        user.appliedJobs.push(jobId);
         await user.save();
         return res
             .status(200)
@@ -302,5 +330,6 @@ const UserController = {
     getOrganizationsPagination,
     getUsersPagination,
     applyForJob,
+    getOrgById,
 };
 export default UserController;

@@ -102,23 +102,40 @@ const UserSchema = new Schema(
             },
             validate: [validator.isEmail, "Please enter a valid email"],
         },
-        newsResources: [
-            {
-                title: {
-                    type: String,
-                    required: true,
+        newsResources: {
+            type: [
+                {
+                    title: {
+                        type: String,
+                        required: function () {
+                            return this.role === "Org";
+                        },
+                    },
+                    description: {
+                        type: String,
+                        required: function () {
+                            return this.role === "Org";
+                        },
+                    },
+                    content: {
+                        type: String,
+                        required: function () {
+                            return this.role === "Org";
+                        },
+                    },
                 },
-                description: {
-                    type: String,
-                    required: true,
+            ],
+            validate: {
+                validator: function (value) {
+                    if (this.role === "Org") {
+                        return value && value.length > 0;
+                    }
+                    return true;
                 },
-                content: {
-                    type: String,
-                    required: true,
-                },
+                message: "News resources are required for Organizations.",
             },
-        ],
-        Jobs: [
+        },
+        appliedJobs: [
             {
                 type: Schema.Types.ObjectId,
                 ref: "Job",

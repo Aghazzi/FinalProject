@@ -38,7 +38,7 @@ export const getJobPagination = async (req, res) => {
             sort: { createdAt: -1 },
         };
 
-        const result = await Job.paginate(options);
+        const result = await Job.paginate({}, options);
 
         const { docs, totalDocs, totalPages, hasNextPage, nextPage } = result;
         const adjustedLimit =
@@ -96,7 +96,7 @@ export const createJob = async (req, res) => {
         if (!org) {
             return res.status(404).json({ message: "Organization not found" });
         }
-        org.Jobs.push(job._id);
+        org.appliedJobs.push(job._id);
         await org.save();
         return res
             .status(201)
