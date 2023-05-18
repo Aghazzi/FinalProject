@@ -13,13 +13,27 @@ router.post(
     UserController.applyForJob
 );
 
-router.get("/organizations", UserController.getOrganizationsPagination);
-router.get("/users", UserController.getUsersPagination);
+router.get(
+    "/organizations",
+    verifyToken,
+    UserController.getOrganizationsPagination
+);
+router.get("/users", verifyToken, UserController.getUsersPagination);
 
-router.get("/user/:id", UserController.getUserById);
-router.get("/org/:id", UserController.getOrgById);
-router.put("/:id", UserController.updateUser);
-router.delete("/:id", UserController.deleteUser);
+router.get("/user/:id", verifyToken, UserController.getUserById);
+router.get("/org/:id", verifyToken, UserController.getOrgById);
+router.put(
+    "/:id",
+    verifyToken,
+    accessRoles(["User", "Org"]),
+    UserController.updateUser
+);
+router.delete(
+    "/:id",
+    verifyToken,
+    accessRoles(["User", "Org"]),
+    UserController.deleteUser
+);
 
 router.get("/", UserController.getUsers);
 

@@ -77,9 +77,11 @@ export const createJob = async (req, res) => {
         orgId,
     } = req.body;
 
+    if (req.user.role !== "Org") {
+        return res.status(403).json({ message: "Unauthorized" });
+    }
+
     try {
-        console.log(requiredSkills);
-        console.log(typeof requiredSkills);
         const job = await Job.create({
             title,
             description,
@@ -121,6 +123,10 @@ export const updateJob = async (req, res) => {
         nbOfVolunteers,
     } = req.body;
 
+    if (req.user.role !== "Org") {
+        return res.status(403).json({ message: "Unauthorized" });
+    }
+
     try {
         const job = await Job.findByIdAndUpdate(
             id,
@@ -151,6 +157,10 @@ export const updateJob = async (req, res) => {
 // Delete a job
 export const deleteJob = async (req, res) => {
     const { id } = req.params;
+
+    if (req.user.role !== "Org") {
+        return res.status(403).json({ message: "Unauthorized" });
+    }
 
     try {
         const job = await Job.findByIdAndDelete(id);

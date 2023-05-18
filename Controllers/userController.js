@@ -76,7 +76,6 @@ export const login = async (req, res) => {
 
     try {
         const user = await User.findOne({ email }).select("password role");
-        console.log(user);
         if (!user) {
             return res.status(404).json({ message: "email not found" });
         }
@@ -285,13 +284,10 @@ export const getUsersPagination = async (req, res) => {
 
 export const applyForJob = async (req, res) => {
     const { jobId } = req.params;
-    console.log(jobId);
-    // const { applicant } = req.body;
     const applicant = req.user.userId;
 
     try {
         const user = await User.findById(req.user.userId);
-        console.log(user);
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
