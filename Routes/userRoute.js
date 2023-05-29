@@ -12,6 +12,7 @@ router.post(
     accessRoles(["User"]),
     UserController.applyForJob
 );
+router.post("/logout", UserController.logout);
 
 router.get(
     "/organizations",

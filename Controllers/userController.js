@@ -61,6 +61,18 @@ export const register = async (req, res) => {
         await newUser.validate();
         const user = await newUser.save();
         const { password: removedPassword, ...returnUser } = user._doc;
+        const token = jwt.sign(
+            { userId: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h",
+            }
+        );
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            maxAge: 60 * 60 * 1000,
+        });
         return res
             .status(201)
             .json({ message: "Registration successful", user: returnUser });
@@ -316,6 +328,12 @@ export const applyForJob = async (req, res) => {
     }
 };
 
+export const logout = (req, res) => {
+    const token = req.headers.authorization?.split(" ")[1];
+    res.clearCookie("token");
+    return res.json({ message: "Logged out successfully" });
+};
+
 const UserController = {
     login,
     register,
@@ -327,5 +345,6 @@ const UserController = {
     getUsersPagination,
     applyForJob,
     getOrgById,
+    logout,
 };
 export default UserController;

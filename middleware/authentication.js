@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import User from "../Models/userModel.js";
 
 const verifyToken = (req, res, next) => {
     try {
@@ -11,9 +10,7 @@ const verifyToken = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (error) {
-        return res
-            .status(400)
-            .json({ message: "Token is invalid", error: error.message });
+        return res.status(400).json({ message: "Token is invalid" });
     }
 };
 
@@ -24,9 +21,7 @@ export const accessRoles = (rolesAllowed) => {
         if (rolesAllowed.includes(req.user.role)) {
             return next();
         } else {
-            return res
-                .status(401)
-                .json({ status: "Failed", message: "Not Authorized" });
+            return res.status(401).json({ message: "Not Authorized" });
         }
     };
 };

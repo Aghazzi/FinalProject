@@ -50,19 +50,15 @@ const UserSchema = new Schema(
             {
                 position: {
                     type: String,
-                    required: true,
                 },
                 description: {
                     type: String,
-                    required: true,
                 },
                 company: {
                     type: String,
-                    required: true,
                 },
                 startDate: {
                     type: Date,
-                    required: true,
                 },
                 endDate: {
                     type: Date,
