@@ -8,7 +8,12 @@ router.get("/jobs", verifyToken, JobController.getJobPagination);
 router.get("/", JobController.getJobs);
 router.get("/:id", verifyToken, JobController.getJobById);
 router.post("/", verifyToken, accessRoles(["Org"]), JobController.createJob);
-router.put("/:id", verifyToken, accessRoles(["Org"]), JobController.updateJob);
+router.patch(
+    "/:id",
+    verifyToken,
+    accessRoles(["Org"]),
+    JobController.updateJob
+);
 router.delete(
     "/org/:id",
     verifyToken,

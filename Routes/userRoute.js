@@ -23,7 +23,7 @@ router.get("/users", verifyToken, UserController.getUsersPagination);
 
 router.get("/user/:id", verifyToken, UserController.getUserById);
 router.get("/org/:id", verifyToken, UserController.getOrgById);
-router.put(
+router.patch(
     "/:id",
     verifyToken,
     accessRoles(["User", "Org"]),
