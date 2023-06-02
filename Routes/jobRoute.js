@@ -4,7 +4,7 @@ import verifyToken, { accessRoles } from "../middleware/authentication.js";
 
 const router = express.Router();
 
-router.get("/jobs", verifyToken, JobController.getJobPagination);
+router.get("/jobs", JobController.getJobPagination);
 router.get("/", JobController.getJobs);
 router.get("/:id", verifyToken, JobController.getJobById);
 router.post("/", verifyToken, accessRoles(["Org"]), JobController.createJob);

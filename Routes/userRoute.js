@@ -14,12 +14,8 @@ router.post(
 );
 router.post("/logout", UserController.logout);
 
-router.get(
-    "/organizations",
-    verifyToken,
-    UserController.getOrganizationsPagination
-);
-router.get("/users", verifyToken, UserController.getUsersPagination);
+router.get("/organizations", UserController.getOrganizationsPagination);
+router.get("/users", UserController.getUsersPagination);
 
 router.get("/user/:id", verifyToken, UserController.getUserById);
 router.get("/org/:id", verifyToken, UserController.getOrgById);
