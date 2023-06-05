@@ -112,12 +112,10 @@ export const login = async (req, res) => {
             }
         );
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            maxAge: 60 * 60 * 1000,
-        });
         // console.log(user)
-        return res.status(200).json({ message: "Logged in successfully" });
+        return res
+            .status(200)
+            .json({ message: "Logged in successfully", authToken: token });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: error.message });
