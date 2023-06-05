@@ -23,6 +23,7 @@ export const register = async (req, res) => {
         orgName,
         description,
         website,
+        isActive,
     } = req.body;
 
     try {
@@ -46,12 +47,18 @@ export const register = async (req, res) => {
             skills ? (newUser.skills = skills) : null;
             experience ? (newUser.experience = experience) : null;
             interests ? (newUser.interests = interests) : null;
+            isActive !== undefined
+                ? (newUser.isActive = isActive)
+                : (newUser.isActive = true);
         } else if (role === "Org") {
             newUser.orgName = orgName;
             newUser.newsResources = newsResources;
             newUser.contactPersonEmail = contactPersonEmail;
             newUser.contactPersonPhone = contactPersonPhone;
             newUser.contactPersonName = contactPersonName;
+            isActive !== undefined
+                ? (newUser.isActive = isActive)
+                : (newUser.isActive = true);
             description ? (newUser.description = description) : null;
             website ? (newUser.website = website) : null;
         }
