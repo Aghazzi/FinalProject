@@ -94,9 +94,9 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await User.findOne({ email }).select("password role");
+        const user = await User.findOne({ email }).select("+password");
         if (!user) {
-            return res.status(404).json({ message: "email not found" });
+            return res.status(404).json({ message: "Email not found" });
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -104,18 +104,36 @@ export const login = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ message: "Invalid password" });
         }
+
         const token = jwt.sign(
             { userId: user._id, role: user.role },
             process.env.JWT_SECRET,
-            {
-                expiresIn: "1h",
-            }
+            { expiresIn: "1h" }
         );
 
-        // console.log(user)
-        return res
-            .status(200)
-            .json({ message: "Logged in successfully", authToken: token });
+        const userData = {
+            _id: user._id,
+            email: user.email,
+            country: user.country,
+            city: user.city,
+            skills: user.skills,
+            interests: user.interests,
+            Jobs: user.Jobs,
+            isActive: user.isActive,
+            role: user.role,
+            experience: user.experience,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            appliedJobs: user.appliedJobs,
+        };
+
+        return res.status(200).json({
+            message: "Logged in successfully",
+            user: userData,
+            authToken: token,
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: error.message });
