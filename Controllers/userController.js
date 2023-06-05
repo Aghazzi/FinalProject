@@ -218,7 +218,7 @@ export const deleteUser = async (req, res) => {
 
 // get paginated organizations //
 export const getOrganizationsPagination = async (req, res) => {
-    const { page = 1, limit = 5 } = req.query;
+    const { page = 1, limit = 12 } = req.query;
 
     try {
         const options = {
