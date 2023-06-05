@@ -283,9 +283,12 @@ export const getUsersPagination = async (req, res) => {
                 : null,
         };
 
-        const populatedDocs = await User.find({ _id: { $in: docs } }).select(
-            "-newsResources"
-        );
+        const populatedDocs = await User.find({ _id: { $in: docs } })
+            .select("-newsResources")
+            .populate({
+                path: "appliedJobs",
+                select: "-volunteers",
+            });
 
         return res.status(200).json({ users: populatedDocs, pagination });
     } catch (error) {
